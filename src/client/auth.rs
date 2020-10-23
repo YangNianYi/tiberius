@@ -26,14 +26,12 @@ impl Debug for SqlServerAuth {
 }
 
 #[derive(Clone, PartialEq)]
-#[cfg(any(windows, doc))]
 pub struct WindowsAuth {
     pub(crate) user: String,
     pub(crate) password: String,
     pub(crate) domain: Option<String>,
 }
 
-#[cfg(any(windows, doc))]
 impl Debug for WindowsAuth {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("WindowsAuth")
@@ -50,7 +48,6 @@ pub enum AuthMethod {
     /// Authenticate directly with SQL Server. The only authentication method
     /// that works on all platforms.
     SqlServer(SqlServerAuth),
-    #[cfg(any(windows, doc))]
     /// Authenticate with Windows credentials. Only available on Windows
     /// platforms.
     Windows(WindowsAuth),
@@ -74,7 +71,6 @@ impl AuthMethod {
 
     /// Construct a new Windows authentication configuration. Only available on
     /// Windows platforms.
-    #[cfg(any(windows, doc))]
     pub fn windows(user: impl AsRef<str>, password: impl ToString) -> Self {
         let (domain, user) = match user.as_ref().find("\\") {
             Some(idx) => (Some(&user.as_ref()[..idx]), &user.as_ref()[idx + 1..]),

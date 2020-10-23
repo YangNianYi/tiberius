@@ -13,7 +13,6 @@ use crate::{
     EncryptionLevel, SqlReadBytes,
 };
 use bytes::BytesMut;
-#[cfg(any(windows, feature = "integrated-auth-gssapi"))]
 use codec::TokenSSPI;
 use futures::{ready, AsyncRead, AsyncWrite, SinkExt, Stream, TryStream, TryStreamExt};
 use futures_codec::Framed;
@@ -30,8 +29,7 @@ use std::ops::Deref;
 use std::{cmp, fmt::Debug, io, pin::Pin, task};
 use task::Poll;
 use tracing::{event, Level};
-#[cfg(windows)]
-use winauth::{windows::NtlmSspiBuilder, NextBytes};
+use winauth::NextBytes;
 
 /// A `Connection` is an abstraction between the [`Client`] and the server. It
 /// can be used as a `Stream` to fetch [`Packet`]s from and to `send` packets
@@ -99,7 +97,6 @@ impl<S: AsyncRead + AsyncWrite + Unpin + Send> Connection<S> {
         TokenStream::new(self).flush_done().await
     }
 
-    #[cfg(any(windows, feature = "integrated-auth-gssapi"))]
     /// Flush the incoming token stream until receiving `SSPI` token.
     async fn flush_sspi(&mut self) -> crate::Result<TokenSSPI> {
         TokenStream::new(self).flush_sspi().await
@@ -307,7 +304,6 @@ impl<S: AsyncRead + AsyncWrite + Unpin + Send> Connection<S> {
 
                 self.send(header, next_token).await?;
             }
-            #[cfg(windows)]
             AuthMethod::Windows(auth) => {
                 let spn = self.context.spn().to_string();
                 let builder = winauth::NtlmV2ClientBuilder::new().target_spn(spn);

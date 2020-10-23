@@ -175,7 +175,6 @@ impl Config {
         }
 
         if let Some(_instance) = server.instance {
-            #[cfg(windows)]
             builder.instance_name(_instance);
         }
 
